@@ -1,10 +1,22 @@
 """
 J.A.R.V.I.S - Just A Rather Very Intelligent System
-Main AI Assistant Program
+Main AI Assistant Program with ChatGPT Integration
 """
 
 import os
 from datetime import datetime
+from config import OPENAI_API_KEY
+
+# Try to import OpenAI - install if needed
+try:
+    from openai import OpenAI
+except ImportError:
+    print("Installing OpenAI library...")
+    os.system("pip install openai")
+    from openai import OpenAI
+
+# Initialize OpenAI client
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Simple greeting function
 def greet_user():
@@ -20,45 +32,37 @@ def greet_user():
     
     return greeting
 
-# Basic AI response function
+# ChatGPT response function
 def get_response(user_input):
-    """Generate a response based on user input"""
-    user_input = user_input.lower()
-    
-    # Simple keyword-based responses
-    if "hello" in user_input or "hi" in user_input:
-        return "Hello! I am J.A.R.V.I.S. How can I assist you today?"
-    
-    elif "what is your name" in user_input:
-        return "I am J.A.R.V.I.S - Just A Rather Very Intelligent System. At your service."
-    
-    elif "time" in user_input:
-        current_time = datetime.now().strftime("%H:%M:%S")
-        return f"The current time is {current_time}"
-    
-    elif "date" in user_input:
-        current_date = datetime.now().strftime("%B %d, %Y")
-        return f"Today's date is {current_date}"
-    
-    elif "help" in user_input:
-        return """I can help you with:
-        - Greeting (say 'hello')
-        - Time and date queries
-        - Simple calculations
-        - General questions
-        
-        What would you like to know?"""
-    
-    else:
-        return "I'm still learning. Could you rephrase that or ask me something else?"
+    """Get a response from ChatGPT"""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are J.A.R.V.I.S, a helpful and intelligent AI assistant. Be concise and friendly in your responses."
+                },
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ],
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"I encountered an error: {str(e)}"
 
 # Main function
 def main():
     """Main program loop"""
-    print("=" * 50)
+    print("=" * 60)
     print(greet_user())
-    print("=" * 50)
-    print("\nType 'exit' to quit\n")
+    print("=" * 60)
+    print("\nI'm now connected to ChatGPT! Ask me anything!")
+    print("Type 'exit' to quit\n")
     
     while True:
         try:
